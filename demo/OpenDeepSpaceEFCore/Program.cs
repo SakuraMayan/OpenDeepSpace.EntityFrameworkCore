@@ -16,6 +16,14 @@ builder.Services.AddDbContext<CustomDbContext>(opt =>
         ServerVersion.AutoDetect("server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"));
 });
 
+
+//工作单元注入
+builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
+builder.Services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
+builder.Services.AddScoped(typeof(IUnitOfWorkDbContextProvider<>),typeof(UnitOfWorkDbContextProvider<>));
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

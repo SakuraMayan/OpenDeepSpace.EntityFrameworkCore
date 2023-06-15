@@ -14,10 +14,12 @@ namespace OpenDeepSpaceEFCore.Controllers
 
 
         public CustomDbContext CustomDbContext { get; set; }
+        public CustomDbContext CustomDbContext2 { get; set; }
 
-        public EFCoreTransactionController(CustomDbContext customDbContext)
+        public EFCoreTransactionController(CustomDbContext customDbContext, CustomDbContext customDbContext2)
         {
             CustomDbContext = customDbContext;
+            CustomDbContext2 = customDbContext2;
         }
 
 

@@ -11,10 +11,12 @@ namespace OpenDeepSpaceEFCore
     {
         public DbSet<Role> Role { get; set; }
 
+        public Guid Id { get; set; }
+
 
         public CustomDbContext(DbContextOptions<CustomDbContext> options) :base(options)
         {
-                
+                Id=Guid.NewGuid();
         }
     }
 }
