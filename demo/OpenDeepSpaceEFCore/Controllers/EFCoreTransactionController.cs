@@ -87,6 +87,25 @@ namespace OpenDeepSpaceEFCore.Controllers
         public void EFCoreDefaultTrasactionB()
         {//不启用自动事务
 
+            /*
+             * 
+             以下不开启事务会有两种情况：
+                1.第一条数据保存到数据库成功 :在SaveChanges不打断点暂停
+                2.两条都不成功:如果在SaveChanges这里打个断点 隔一下时间在提交会发现第一条数据也不会成功插入 可能是因为CustomDbContext.Add数据由一定缓存时间，时间到了就没有数据了，因此不会写入到数据库中
+            
+            //关闭自动事务
+            CustomDbContext.Database.AutoTransactionsEnabled = false;
+            CustomDbContext.Add(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+
+            //CustomDbContext.SaveChanges(); //  每调用一次SaveChange就是一次保存到数据库
+
+            //这条由于RoleName超长将执行失败
+            CustomDbContext.Add(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+
+            CustomDbContext.SaveChanges();
+
+             */
+
             //关闭自动事务
             CustomDbContext.Database.AutoTransactionsEnabled = false;
             CustomDbContext.Add(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
