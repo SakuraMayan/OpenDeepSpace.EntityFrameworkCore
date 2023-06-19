@@ -7,7 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E94B38DE-72D
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "demo", "demo", "{90069A4D-8B73-4DAB-85E7-92D951DDFD8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDeepSpaceEFCore", "demo\OpenDeepSpaceEFCore\OpenDeepSpaceEFCore.csproj", "{2B257CA2-355A-4F9F-974C-D79648BC5DC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenDeepSpaceEFCore", "demo\OpenDeepSpaceEFCore\OpenDeepSpaceEFCore.csproj", "{2B257CA2-355A-4F9F-974C-D79648BC5DC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenDeepSpace.EntityFrameworkCore", "src\OpenDeepSpace.EntityFrameworkCore\OpenDeepSpace.EntityFrameworkCore.csproj", "{A0FDF4F7-23B3-43C1-9FA8-F599E448A725}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,12 +21,17 @@ Global
 		{2B257CA2-355A-4F9F-974C-D79648BC5DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B257CA2-355A-4F9F-974C-D79648BC5DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B257CA2-355A-4F9F-974C-D79648BC5DC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A0FDF4F7-23B3-43C1-9FA8-F599E448A725}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0FDF4F7-23B3-43C1-9FA8-F599E448A725}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0FDF4F7-23B3-43C1-9FA8-F599E448A725}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0FDF4F7-23B3-43C1-9FA8-F599E448A725}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2B257CA2-355A-4F9F-974C-D79648BC5DC1} = {90069A4D-8B73-4DAB-85E7-92D951DDFD8D}
+		{A0FDF4F7-23B3-43C1-9FA8-F599E448A725} = {E94B38DE-72DA-4DCD-8157-7AFA71F7B7CA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0EEBAB2C-7D52-4DE8-A001-6C6D935805CD}

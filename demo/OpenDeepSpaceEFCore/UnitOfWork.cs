@@ -45,6 +45,7 @@ namespace OpenDeepSpaceEFCore
         {
             SaveChanges();//暂存
 
+
             foreach (var dbContext in dbContexts.Values)
             {
                 dbContext.Database.CommitTransaction();
@@ -55,7 +56,7 @@ namespace OpenDeepSpaceEFCore
         {
             foreach (var dbContext in dbContexts.Values)
             {
-                dbContext.Database.CommitTransaction();
+                dbContext.Database.RollbackTransaction();
             }
         }
 
