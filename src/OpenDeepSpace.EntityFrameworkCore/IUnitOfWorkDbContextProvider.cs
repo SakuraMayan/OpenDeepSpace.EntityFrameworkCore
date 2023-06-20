@@ -29,6 +29,7 @@ Description:
 
 ===================================================================================================*/
 
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +41,22 @@ namespace OpenDeepSpace.EntityFrameworkCore
     /// <summary>
     /// 工作单元数据库上下文提供者
     /// </summary>
-    public interface IUnitOfWorkDbContextProvider
+    public interface IUnitOfWorkDbContextProvider<TDbContext> where TDbContext:DbContext
     {
+
+        /// <summary>
+        /// 获取上下文
+        /// </summary>
+        /// <returns></returns>
+        TDbContext GetDbContext();
+
+        /// <summary>
+        /// 异步获取上下文
+        /// </summary>
+        /// <returns></returns>
+        Task<TDbContext> GetDbContextAsync();
+
     }
+
+
 }

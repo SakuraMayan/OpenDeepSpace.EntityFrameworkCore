@@ -29,6 +29,7 @@ Description:
 
 ===================================================================================================*/
 
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,10 +38,27 @@ using System.Threading.Tasks;
 
 namespace OpenDeepSpace.EntityFrameworkCore
 {
+
+
     /// <summary>
-    /// 仓储接口
+    /// 上下文实体仓储接口 可以实现指定默认上下文
     /// </summary>
-    public interface IRepository
+    /// <typeparam name="TEntity"></typeparam>
+    public interface IRepository<TEntity> where TEntity : class 
     {
+
+        TEntity Insert(TEntity entity);
+
+        
     }
+
+    /// <summary>
+    /// 上下文实体仓储接口
+    /// </summary>
+    public interface IRepository<TDbContext,TEntity> : IRepository<TEntity> where TDbContext : DbContext where TEntity:class
+    {
+
+    }
+
+
 }

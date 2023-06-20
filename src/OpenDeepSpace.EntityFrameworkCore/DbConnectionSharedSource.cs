@@ -4,7 +4,7 @@
 
 Copyright © 2023 by OpenDeepSpace. All rights reserved.
 Author: OpenDeepSpace	
-CreateTime: 2023/6/19 22:21:59	
+CreateTime: 2023/6/20 21:20:22	
 CLR: 4.0.30319.42000	
 Description:
 
@@ -31,34 +31,39 @@ Description:
 
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using System.Data.Common;
 
 namespace OpenDeepSpace.EntityFrameworkCore
 {
-
     /// <summary>
-    /// 工作单元选项接口
-    /// 涉及对数据库隔离级别 超时的设置
+    /// DbConnection共享源 用于不同上下文实例 同数据库字符串 共享连接提供DbConnection连接源
     /// </summary>
-    public interface IUnitOfWorkOptions
+    public class DbConnectionSharedSource
     {
+        //Dbconnection连接字典 key为字符串名称
+        private readonly Dictionary<string, DbConnection> dbConnections = new Dictionary<string, DbConnection>();
 
-        /// <summary>
-        /// 是否开启事务 主要指的是否手动管理事务
-        /// </summary>
-        bool IsTransactional { get; }
+        
 
-        /// <summary>
-        /// 数据库隔离级别
-        /// </summary>
-        IsolationLevel? IsolationLevel { get; }
+        public DbConnection this[string connectionString]
+        {
+            get
+            {
+                if (!dbConnections.TryGetValue(connectionString, out DbConnection? conn))
+                {
+                    return dbConnections[connectionString] = null;
+                }
+                else
+                {
+                    return conn;
+                }
+            }
 
-        /// <summary>
-        /// 数据库超时时间 毫秒为单位
-        /// </summary>
-        int? Timeout { get; }
+        }
     }
 }
