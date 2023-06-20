@@ -4,7 +4,7 @@
 
 Copyright © 2023 by OpenDeepSpace. All rights reserved.
 Author: OpenDeepSpace	
-CreateTime: 2023/6/20 21:20:22	
+CreateTime: 2023/6/20 23:12:15	
 CLR: 4.0.30319.42000	
 Description:
 
@@ -31,36 +31,33 @@ Description:
 
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using System.Data.Common;
 
 namespace OpenDeepSpace.EntityFrameworkCore
 {
     /// <summary>
-    /// DbConnection共享源 用于不同上下文实例 同数据库字符串 共享连接提供DbConnection连接源
+    /// 数据库上下文事务状态
     /// </summary>
-    public class DbConnectionSharedSource
+    public enum DbContextTransactionStatus
     {
-        //Dbconnection连接字典 key为字符串名称
-        private Dictionary<string, DbConnection> dbConnections = new Dictionary<string, DbConnection>();
+        /// <summary>
+        /// 已开始事务
+        /// </summary>
+        Started,
 
-        
+        /// <summary>
+        /// 已提交事务
+        /// </summary>
+        Commited,
 
-        public DbConnection this[string connectionString]
-        {
-            set { dbConnections[connectionString] = value;}
-            get
-            {
-                if (!dbConnections.ContainsKey(connectionString))
-                    return null;
+        /// <summary>
+        /// 已回滚事务
+        /// </summary>
+        RolledBack
 
-                return dbConnections[connectionString];
-            }
 
-        }
+
     }
 }

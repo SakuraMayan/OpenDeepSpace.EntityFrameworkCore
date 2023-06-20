@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using MySqlConnector;
 using OpenDeepSpace.EntityFrameworkCore;
 using OpenDeepSpaceEntityFrameworkCore.Test;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,9 +26,15 @@ builder.Services.AddScoped<DbConnectionSharedSource>();
 builder.Services.AddScoped<DbContextOptions<CustomDbContext>>(serviceProvider =>
 {
     var builder = new DbContextOptionsBuilder<CustomDbContext>();
-    var source = serviceProvider.GetRequiredService<DbConnectionSharedSource>();
-    var connection = source["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"];
-    builder.UseMySql(ServerVersion.AutoDetect(connection.ConnectionString));
+    var dbConnectionSharedSource = serviceProvider.GetRequiredService<DbConnectionSharedSource>();
+    var connection = dbConnectionSharedSource["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"];
+    if (connection == null) //连接不存在
+    {
+        //构造一个连接
+        connection = new MySqlConnection("server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true");
+        dbConnectionSharedSource["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"] = connection;
+    }
+    builder.UseMySql(connection, ServerVersion.AutoDetect(connection as MySqlConnection), null);//这里第三个参数可拓展 如果封装的话
 
     return builder.Options;
 
@@ -35,9 +43,15 @@ builder.Services.AddScoped<DbContextOptions<CustomDbContext>>(serviceProvider =>
 builder.Services.AddScoped<DbContextOptions<OtherDbContext>>(serviceProvider =>
 {
     var builder = new DbContextOptionsBuilder<OtherDbContext>();
-    var source = serviceProvider.GetRequiredService<DbConnectionSharedSource>();
-    var connection = source["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"];
-    builder.UseMySql(ServerVersion.AutoDetect(connection.ConnectionString));
+    var dbConnectionSharedSource = serviceProvider.GetRequiredService<DbConnectionSharedSource>();
+    var connection = dbConnectionSharedSource["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"];
+    if (connection == null) //连接不存在
+    {
+        //构造一个连接
+        connection = new MySqlConnection("server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true");
+        dbConnectionSharedSource["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"] = connection;
+    }
+    builder.UseMySql(connection, ServerVersion.AutoDetect(connection as MySqlConnection),null);//这里第三个参数可拓展 如果封装的话
 
     return builder.Options;
 
