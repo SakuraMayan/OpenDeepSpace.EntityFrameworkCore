@@ -5,3 +5,18 @@ CREATE TABLE `role` (
   `RoleName` varchar(50) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+======================================
+如果你不手动管理事务（手动开启事务） 那么efcore会自动有一个默认事务执行 
+最后SaveChanges
+每一个都SaveChanges? 不需要 最后SaveChanges一下就行了也能保证事务执行
+
+开放SaveChanges的调用 对于efcore多个操作不需要事务提交的情况 
+
+还是用Commit提交事务即可 
+把SaveChanges封装起来 
+当没有手动管理事务如果想单个提交时就每一个仓储执行后调用一次Commit相当于调用的SaveChanges以及efcore默认的事务，即每一个SaveChanges对应一次事务
+
+这里就是要判断不提交事务的情况了 IsTransactional是否事务执行 
+
+默认的上下文可以弄一个
