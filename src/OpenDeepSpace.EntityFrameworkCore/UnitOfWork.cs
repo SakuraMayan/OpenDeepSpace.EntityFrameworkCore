@@ -39,7 +39,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace OpenDeepSpace.EntityFrameworkCore
 {
@@ -62,14 +61,20 @@ namespace OpenDeepSpace.EntityFrameworkCore
        
         public Guid UnitOfWorkId { get; set; }
 
-        
+        ///工作单元选项不允许设置 只能通过<see cref="Initialize(IUnitOfWorkOptions)"/>来初始化 且一个相同工作单元实例只能初始化一次
+        public IUnitOfWorkOptions UnitOfWorkOptions { get; private set; }
+
         public UnitOfWork()
         {
             UnitOfWorkId = Guid.NewGuid();
         }
 
-       
-        
+        public void Initialize(IUnitOfWorkOptions unitOfWorkOptions)
+        {
+            if (UnitOfWorkOptions == null)//工作单元选项未初始化 才初始化
+                UnitOfWorkOptions = unitOfWorkOptions;
+        }
+
 
         public void Commit()
         {
@@ -155,7 +160,19 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
         public void AddDbContextWithJudgeTransaction(string dbContextKey, DbContext dbContext)
         {
+            ///如果工作单元选项存在并不需要开启事务就不执行手动事务开启 
+            ///事务将是EFCORE默认事务(默认事务没有调用<see cref="DbContext.Database.AutoTransactionsEnabled"/>设置为false来进行关闭此时进行默认事务)
+            ///然又由于提交<see cref="Commit"/>事务的时候 执行<see cref="SaveChanges"/>是按照每个上下文实例循环调用<see cref="DbContext.SaveChanges()"/>也就是说每调用一次就执行一次默认事务并提交数据到数据库
+            ///因此每一个数据库实例的操作，即每一<see cref="Repository{TDbContext, TEntity}"/>的方法调用是处于一个单独的事务
+            if (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional == false)
+            {
+                AddDbContextInternal(dbContextKey, dbContext);
+                return;
+            }
+
+            //工作单元选项为空 或 工作单元选项不为空且需要开启事务 才开启事务
             BeginTransaction(dbContext);
+
             AddDbContextInternal(dbContextKey, dbContext);
 
         }
@@ -177,6 +194,12 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
         private void AddDbContextInternal(string dbContextKey, DbContext dbContext)
         {
+            //工作单元是否存在超时设置 如果当前数据库CommandTimeout设置为空 才进行设置
+            if(UnitOfWorkOptions!=null && UnitOfWorkOptions.Timeout.HasValue
+                && dbContext.Database.GetCommandTimeout()==null
+                )
+                dbContext.Database.SetCommandTimeout(UnitOfWorkOptions.Timeout.Value);
+
             if (!dbContexts.ContainsKey(dbContextKey))//不存在
                 dbContexts[dbContextKey] = dbContext;
         }
@@ -241,7 +264,9 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
             ///开启事务 手动开启事务之后 efcore默认的自动事务将失效
             ///根据<see cref="DbContext.Database.AutoTransactionsEnabled"/> 解释该值设置为false或使用了<see cref="DbContext.Database.BeginTransaction"/> efcore在调用SaveChanges是自动事务将不起作用
-            IDbContextTransaction dbContextTransaction = dbContext.Database.BeginTransaction();
+            ///如果隔离级别有值 就需要启动有隔离级别的事务
+            IDbContextTransaction dbContextTransaction = UnitOfWorkOptions!=null && UnitOfWorkOptions.IsolationLevel.HasValue ?
+                    dbContext.Database.BeginTransaction(UnitOfWorkOptions.IsolationLevel.Value): dbContext.Database.BeginTransaction();
 
             //记录事务状态
             dbContextTransactionsStatus[dbContextTransaction] = DbContextTransactionStatus.Started;

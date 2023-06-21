@@ -18,6 +18,9 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test
             _repo = repo;
             _otherRepo = otherRepo;
             _unitOfWork = unitOfWork;
+
+            //不开启事务
+            _unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });
         }
 
         public override async Task ExecuteAsync(RoleJobArgs args)

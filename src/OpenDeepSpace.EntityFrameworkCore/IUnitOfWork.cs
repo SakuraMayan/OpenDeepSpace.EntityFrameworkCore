@@ -44,7 +44,15 @@ namespace OpenDeepSpace.EntityFrameworkCore
     /// </summary>
     public interface IUnitOfWork
     {
-        public Guid UnitOfWorkId { get; }
+        Guid UnitOfWorkId { get; }
+
+        IUnitOfWorkOptions UnitOfWorkOptions { get; }
+
+        /// <summary>
+        /// 初始化工作单元选项
+        /// </summary>
+        /// <param name="unitOfWorkOptions"></param>
+        void Initialize(IUnitOfWorkOptions unitOfWorkOptions);
 
         /// <summary>
         /// 提交事务
