@@ -31,6 +31,7 @@ Description:
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -47,6 +48,8 @@ namespace OpenDeepSpace.EntityFrameworkCore
     /// </summary>
     public class UnitOfWork : IUnitOfWork
     {
+        private ILogger<UnitOfWork> logger;
+
         //存储上下文
         public Dictionary<string,DbContext> dbContexts = new Dictionary<string,DbContext>();
 
@@ -64,9 +67,10 @@ namespace OpenDeepSpace.EntityFrameworkCore
         ///工作单元选项不允许设置 只能通过<see cref="Initialize(IUnitOfWorkOptions)"/>来初始化 且一个相同工作单元实例只能初始化一次
         public IUnitOfWorkOptions UnitOfWorkOptions { get; private set; }
 
-        public UnitOfWork()
+        public UnitOfWork(ILogger<UnitOfWork> logger)
         {
             UnitOfWorkId = Guid.NewGuid();
+            this.logger = logger;
         }
 
         public void Initialize(IUnitOfWorkOptions unitOfWorkOptions)
@@ -97,8 +101,11 @@ namespace OpenDeepSpace.EntityFrameworkCore
                     dbContextTransactionsStatus[transaction] = DbContextTransactionStatus.Commited;
                 
                 }
-                catch 
+                catch (Exception ex)
                 {//提交事务出现异常回滚 如果都没到这一步就出现异常事务都未提交就不需要回滚了
+
+                    //输出日志
+                    logger.LogError($"{typeof(UnitOfWork)}-{UnitOfWorkId}.{nameof(Commit)}:{ex.Message}{ex.StackTrace}");
 
                     //回滚事务并记录事务状态
                     RollBackInternal(transaction);
@@ -146,8 +153,15 @@ namespace OpenDeepSpace.EntityFrameworkCore
             ///上面提交事务<see cref="Commit"/>的时候也不会在提交对应的事务 也不会执行成功
             if (dbContextTransactionsStatus[dbContextTransaction] == DbContextTransactionStatus.RolledBack)
                 return;
-
-            dbContextTransaction.Rollback();
+            try
+            { //尝试回滚
+                dbContextTransaction.Rollback();
+            }
+            catch(Exception ex)
+            {
+                //输出日志
+                logger.LogError($"{typeof(UnitOfWork)}-{UnitOfWorkId}.{nameof(RollBackInternal)}:{ex.Message}{ex.StackTrace}");
+            }
 
             //事务状态改变为已回滚
             dbContextTransactionsStatus[dbContextTransaction] = DbContextTransactionStatus.RolledBack;
@@ -302,11 +316,14 @@ namespace OpenDeepSpace.EntityFrameworkCore
                 {
                     context.SaveChanges();//数据出问题会出异常
                 }
-                catch //捕获到数据库保存改变异常
+                catch(Exception ex) //捕获到数据库保存改变异常
                 {
+                    //输出日志
+                    logger.LogError($"{typeof(UnitOfWork)}-{UnitOfWorkId}.{nameof(SaveChanges)}:{ex.Message}{ex.StackTrace}");
+
                     //回滚事务 并记录事务所处状态
                     //RollBackInternal(context.Database.CurrentTransaction);//通过context.Database.CurrentTransaction获取出的当前事务与记录的事务不一样即使共享事务所以我们直接通过连接从事务字典中取
-                    if(dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
+                    if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
                         RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
                 }
             }
