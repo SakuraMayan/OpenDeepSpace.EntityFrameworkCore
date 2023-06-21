@@ -105,7 +105,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
                 {//提交事务出现异常回滚 如果都没到这一步就出现异常事务都未提交就不需要回滚了
 
                     //输出日志
-                    logger.LogError($"{typeof(UnitOfWork)}-{UnitOfWorkId}.{nameof(Commit)}:{ex.Message}{ex.StackTrace}");
+                    logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(Commit)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException.Message}{ex.InnerException.StackTrace}");
 
                     //回滚事务并记录事务状态
                     RollBackInternal(transaction);
@@ -160,7 +160,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
             catch(Exception ex)
             {
                 //输出日志
-                logger.LogError($"{typeof(UnitOfWork)}-{UnitOfWorkId}.{nameof(RollBackInternal)}:{ex.Message}{ex.StackTrace}");
+                logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(RollBackInternal)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException.Message}{ex.InnerException.StackTrace}");
             }
 
             //事务状态改变为已回滚
@@ -319,7 +319,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
                 catch(Exception ex) //捕获到数据库保存改变异常
                 {
                     //输出日志
-                    logger.LogError($"{typeof(UnitOfWork)}-{UnitOfWorkId}.{nameof(SaveChanges)}:{ex.Message}{ex.StackTrace}");
+                    logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(SaveChanges)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException.Message}{ex.InnerException.StackTrace}");
 
                     //回滚事务 并记录事务所处状态
                     //RollBackInternal(context.Database.CurrentTransaction);//通过context.Database.CurrentTransaction获取出的当前事务与记录的事务不一样即使共享事务所以我们直接通过连接从事务字典中取
