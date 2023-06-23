@@ -47,8 +47,19 @@ namespace OpenDeepSpace.EntityFrameworkCore
     public interface IRepository<TEntity> where TEntity : class 
     {
 
+        /// <summary>
+        /// 添加
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
         TEntity Insert(TEntity entity);
 
+        /// <summary>
+        /// 异步添加
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        Task<TEntity> InsertAsync(TEntity entity);
         
     }
 

@@ -57,5 +57,10 @@ namespace OpenDeepSpace.EntityFrameworkCore
             ///如果没有开启手动管理事务且<see cref="DbContext.Database.AutoTransactionsEnabled"/>的值为false就没有事务，执行一次SaveChanges会自动写入数据到数据库
             return _unitOfWorkDbContextProvider.GetDbContext().Add(entity).Entity;
         }
+
+        public async Task<TEntity> InsertAsync(TEntity entity)
+        {
+            return (await _unitOfWorkDbContextProvider.GetDbContextAsync()).AddAsync(entity).Result.Entity;    
+        }
     }
 }

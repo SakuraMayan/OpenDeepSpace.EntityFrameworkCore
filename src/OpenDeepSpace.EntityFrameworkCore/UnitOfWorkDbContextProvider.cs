@@ -75,6 +75,13 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
         public async Task<TDbContext> GetDbContextAsync()
         {
+
+            string dbContextKey = typeof(TDbContext).FullName + "&&" + _context.Database.GetConnectionString() + "&&" + _context.ContextId.InstanceId;
+            if (_unitOfWork.GetDbContext(dbContextKey) != null) //完全相同的直接返回
+                return (TDbContext)_unitOfWork.GetDbContext(dbContextKey);
+
+            await _unitOfWork.AddDbContextWithJudgeTransactionAsync(dbContextKey, _context);
+
             return _context;
         }
     }

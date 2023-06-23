@@ -105,7 +105,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
                 {//提交事务出现异常回滚 如果都没到这一步就出现异常事务都未提交就不需要回滚了
 
                     //输出日志
-                    logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(Commit)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException.Message}{ex.InnerException.StackTrace}");
+                    logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(Commit)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
 
                     //回滚事务并记录事务状态
                     RollBackInternal(transaction);
@@ -118,9 +118,31 @@ namespace OpenDeepSpace.EntityFrameworkCore
             await SaveChangesAsync();
 
             //提交改变到数据库
-            foreach (var context in dbContexts.Values)
-            { 
-            
+            foreach (var transaction in dbContextTransactions.Values)
+            {
+                //尝试提交事务
+                try
+                {
+
+                    //事务已回滚 或已提交 就直接返回 不需要在提交
+                    if (dbContextTransactionsStatus[transaction] == DbContextTransactionStatus.RolledBack || dbContextTransactionsStatus[transaction] == DbContextTransactionStatus.Commited)
+                        return;
+
+
+                    await transaction.CommitAsync();
+                    //记录事务为已提交状态
+                    dbContextTransactionsStatus[transaction] = DbContextTransactionStatus.Commited;
+
+                }
+                catch (Exception ex)
+                {//提交事务出现异常回滚 如果都没到这一步就出现异常事务都未提交就不需要回滚了
+
+                    //输出日志
+                    logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(CommitAsync)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
+
+                    //回滚事务并记录事务状态
+                    await RollBackInternalAsync(transaction);
+                }
             }
         }
 
@@ -160,31 +182,36 @@ namespace OpenDeepSpace.EntityFrameworkCore
             catch(Exception ex)
             {
                 //输出日志
-                logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(RollBackInternal)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException.Message}{ex.InnerException.StackTrace}");
+                logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(RollBackInternal)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
             }
 
             //事务状态改变为已回滚
             dbContextTransactionsStatus[dbContextTransaction] = DbContextTransactionStatus.RolledBack;
         }
 
-        private Task RollBackInternalAsync()
-        { 
-            return Task.CompletedTask;
+        private async Task RollBackInternalAsync(IDbContextTransaction dbContextTransaction)
+        {
+            ///回滚事务 如果事务已回滚 在后续执行出现的错误中就不再回滚了 即使后续的同连接上下文存在SaveChanges操作
+            ///上面提交事务<see cref="Commit"/>的时候也不会在提交对应的事务 也不会执行成功
+            if (dbContextTransactionsStatus[dbContextTransaction] == DbContextTransactionStatus.RolledBack)
+                await Task.CompletedTask;
+            try
+            { //尝试回滚
+                await dbContextTransaction.RollbackAsync();
+            }
+            catch (Exception ex)
+            {
+                //输出日志
+                logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(RollBackInternalAsync)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
+            }
+
+            //事务状态改变为已回滚
+            dbContextTransactionsStatus[dbContextTransaction] = DbContextTransactionStatus.RolledBack;
         }
 
         public void AddDbContextWithJudgeTransaction(string dbContextKey, DbContext dbContext)
         {
-            ///如果工作单元选项存在并不需要开启事务就不执行手动事务开启 
-            ///事务将是EFCORE默认事务(默认事务没有调用<see cref="DbContext.Database.AutoTransactionsEnabled"/>设置为false来进行关闭此时进行默认事务)
-            ///然又由于提交<see cref="Commit"/>事务的时候 执行<see cref="SaveChanges"/>是按照每个上下文实例循环调用<see cref="DbContext.SaveChanges()"/>也就是说每调用一次就执行一次默认事务并提交数据到数据库
-            ///因此每一个数据库实例的操作，即每一<see cref="Repository{TDbContext, TEntity}"/>的方法调用是处于一个单独的事务
-            if (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional == false)
-            {
-                AddDbContextInternal(dbContextKey, dbContext);
-                return;
-            }
-
-            //工作单元选项为空 或 工作单元选项不为空且需要开启事务 才开启事务
+           
             BeginTransaction(dbContext);
 
             AddDbContextInternal(dbContextKey, dbContext);
@@ -194,6 +221,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
         public async Task AddDbContextWithJudgeTransactionAsync(string dbContextKey, DbContext dbContext)
         {
+
             await BeginTransactionAsync(dbContext);
 
             AddDbContextInternal(dbContextKey, dbContext);
@@ -262,7 +290,19 @@ namespace OpenDeepSpace.EntityFrameworkCore
             //dbContextTransactions.Add(connectionString, dbContextTransaction);
 
             //========采用新的=============
+
+
+            ///如果工作单元选项存在并不需要开启事务就不执行手动事务开启 
+            ///事务将是EFCORE默认事务(默认事务没有调用<see cref="DbContext.Database.AutoTransactionsEnabled"/>设置为false来进行关闭此时进行默认事务)
+            ///然又由于提交<see cref="Commit"/>事务的时候 执行<see cref="SaveChanges"/>是按照每个上下文实例循环调用<see cref="DbContext.SaveChanges()"/>也就是说每调用一次就执行一次默认事务并提交数据到数据库
+            ///因此每一个数据库实例的操作，即每一<see cref="Repository{TDbContext, TEntity}"/>的方法调用是处于一个单独的事务
+            if (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional == false)
+              return;
             
+
+            //工作单元选项为空 或 工作单元选项不为空且需要开启事务 才开启事务
+
+
             DbConnection dbConnection = dbContext.Database.GetDbConnection();
 
             //查找对应的DbConnection是否存在事务 存在就表示是相同的DbConnection连接 那么采用共享事务 否则连接生成新事务
@@ -300,8 +340,42 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// <param name="dbContext"></param>
         /// <returns></returns>
         private async Task BeginTransactionAsync(DbContext dbContext)
-        { 
-            await dbContext.Database.BeginTransactionAsync();
+        {
+            ///如果工作单元选项存在并不需要开启事务就不执行手动事务开启 
+            ///事务将是EFCORE默认事务(默认事务没有调用<see cref="DbContext.Database.AutoTransactionsEnabled"/>设置为false来进行关闭此时进行默认事务)
+            ///然又由于提交<see cref="Commit"/>事务的时候 执行<see cref="SaveChanges"/>是按照每个上下文实例循环调用<see cref="DbContext.SaveChanges()"/>也就是说每调用一次就执行一次默认事务并提交数据到数据库
+            ///因此每一个数据库实例的操作，即每一<see cref="Repository{TDbContext, TEntity}"/>的方法调用是处于一个单独的事务
+            if (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional == false)
+                return;
+
+
+            //工作单元选项为空 或 工作单元选项不为空且需要开启事务 才开启事务
+
+
+            DbConnection dbConnection = dbContext.Database.GetDbConnection();
+
+            //查找对应的DbConnection是否存在事务 存在就表示是相同的DbConnection连接 那么采用共享事务 否则连接生成新事务
+
+            if (dbContextTransactions.ContainsKey(dbConnection))//同连接 存在事务 就共享事务
+            {
+                await dbContext.Database.UseTransactionAsync(dbContextTransactions[dbConnection].GetDbTransaction());
+                return;
+            }
+
+
+
+
+            ///开启事务 手动开启事务之后 efcore默认的自动事务将失效
+            ///根据<see cref="DbContext.Database.AutoTransactionsEnabled"/> 解释该值设置为false或使用了<see cref="DbContext.Database.BeginTransactionAsync"/> efcore在调用SaveChanges是自动事务将不起作用
+            ///如果隔离级别有值 就需要启动有隔离级别的事务
+            IDbContextTransaction dbContextTransaction = UnitOfWorkOptions != null && UnitOfWorkOptions.IsolationLevel.HasValue ?
+                    await dbContext.Database.BeginTransactionAsync(UnitOfWorkOptions.IsolationLevel.Value) : await dbContext.Database.BeginTransactionAsync();
+
+            //记录事务状态
+            dbContextTransactionsStatus[dbContextTransaction] = DbContextTransactionStatus.Started;
+
+            //事务加入到工作单元中 这里如果多个不同的上下文实例 同一字符串没使用共享连接 加入可能出现异常
+            dbContextTransactions.Add(dbConnection, dbContextTransaction);
         }
 
         /// <summary>
@@ -319,7 +393,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
                 catch(Exception ex) //捕获到数据库保存改变异常
                 {
                     //输出日志
-                    logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(SaveChanges)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException.Message}{ex.InnerException.StackTrace}");
+                    logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(SaveChanges)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
 
                     //回滚事务 并记录事务所处状态
                     //RollBackInternal(context.Database.CurrentTransaction);//通过context.Database.CurrentTransaction获取出的当前事务与记录的事务不一样即使共享事务所以我们直接通过连接从事务字典中取
@@ -335,8 +409,22 @@ namespace OpenDeepSpace.EntityFrameworkCore
         private async Task SaveChangesAsync()
         {
             foreach (var context in dbContexts.Values)
-            { 
-                await context.SaveChangesAsync();
+            {
+                //尝试执行数据库保存改变
+                try
+                {
+                    await context.SaveChangesAsync();//数据出问题会出异常
+                }
+                catch (Exception ex) //捕获到数据库保存改变异常
+                {
+                    //输出日志
+                    logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(SaveChangesAsync)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
+
+                    //回滚事务 并记录事务所处状态
+                    //RollBackInternal(context.Database.CurrentTransaction);//通过context.Database.CurrentTransaction获取出的当前事务与记录的事务不一样即使共享事务所以我们直接通过连接从事务字典中取
+                    if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
+                        RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
+                }
             }
         }
 
