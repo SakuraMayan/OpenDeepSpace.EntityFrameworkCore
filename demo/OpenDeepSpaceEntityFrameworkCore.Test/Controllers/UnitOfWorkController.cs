@@ -129,5 +129,25 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
             await unitOfWork.CommitAsync();
 
         }
+
+        /// <summary>
+        /// 测试不使用手动事务
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task TestIsTransactionalEqFalse()
+        {
+
+            unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
+
+            //同一上下文实例一次SaveChanges 一次事务
+            await roleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+            //await roleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+            await roleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+            //不同上下文不同SaveChanges
+            await otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+
+            await unitOfWork.CommitAsync();
+        }
     }
 }
