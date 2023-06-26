@@ -58,7 +58,10 @@ namespace OpenDeepSpace.EntityFrameworkCore
             ///且同一个连接字符串<see cref="DbContext.Database.GetConnectionString()"/>  
             ///且是同一个实例<see cref="DbContext.ContextId.InstanceId"/> 才表示是相同的
             ///想想：如果已经是同一个实例<see cref="DbContext.ContextId.InstanceId"/> 那么肯定上下文类型和连接字符串肯定相同 所以下面的内容修改成实例Id即可
-            //string dbContextKey = typeof(TDbContext).FullName + "&&" + _context.Database.GetConnectionString() + "&&" + _context.ContextId.InstanceId;
+            ///通过共享连接之后 获取出来的<see cref="_context.Database.GetConnectionString()"/>是被格式化了的与最初的可能不一样
+            ///string dbContextKey = typeof(TDbContext).FullName + "&&" + _context.Database.GetConnectionString() + "&&" + _context.ContextId.InstanceId;
+            ///注意：这里以实例Id作为Key之后 那么相同上下文在<see cref="IUnitOfWorkOptions.IsTransactional"/>设置为false时，实际指的不开启手动事务，efcore默认事务还是在
+            ///由于同一个上下文最后统一进行SaveChanges 那么还是以事务的形式提交 如果Key采用上面的类型+连接字符串+实例Id 那么就会出现同Key所对应的上下文在UnitOfWork中是采用一次SaveChanges然后采用默认事务
             string dbContextKey = _context.ContextId.InstanceId.ToString();
             if (_unitOfWork.GetDbContext(dbContextKey) != null) //完全相同的直接返回
                 return (TDbContext)_unitOfWork.GetDbContext(dbContextKey);
