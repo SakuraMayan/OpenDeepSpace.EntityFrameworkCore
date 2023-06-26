@@ -57,7 +57,9 @@ namespace OpenDeepSpace.EntityFrameworkCore
             ///指的是同一个DbContext类型<see cref="typeof(TDbContext).FullName"/> 
             ///且同一个连接字符串<see cref="DbContext.Database.GetConnectionString()"/>  
             ///且是同一个实例<see cref="DbContext.ContextId.InstanceId"/> 才表示是相同的
-            string dbContextKey = typeof(TDbContext).FullName + "&&" + _context.Database.GetConnectionString() + "&&" + _context.ContextId.InstanceId;
+            ///想想：如果已经是同一个实例<see cref="DbContext.ContextId.InstanceId"/> 那么肯定上下文类型和连接字符串肯定相同 所以下面的内容修改成实例Id即可
+            //string dbContextKey = typeof(TDbContext).FullName + "&&" + _context.Database.GetConnectionString() + "&&" + _context.ContextId.InstanceId;
+            string dbContextKey = _context.ContextId.InstanceId.ToString();
             if (_unitOfWork.GetDbContext(dbContextKey) != null) //完全相同的直接返回
                 return (TDbContext)_unitOfWork.GetDbContext(dbContextKey);
 
