@@ -56,7 +56,8 @@ GlobalStateHandlers.Handlers.Add(new SucceededJobExpiredHandler());
 
 
 
-
+//sql连接解析
+builder.Services.AddScoped<IConnectionStringResolver, ConnectionStringResolver>();
 
 //sql共享连接
 builder.Services.AddScoped<DbConnectionSharedSource>();
@@ -66,12 +67,15 @@ builder.Services.AddScoped<DbContextOptions<CustomDbContext>>(serviceProvider =>
 {
     var builder = new DbContextOptionsBuilder<CustomDbContext>();
     var dbConnectionSharedSource = serviceProvider.GetRequiredService<DbConnectionSharedSource>();
-    var connection = dbConnectionSharedSource["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"];
+    //解析连接字符串
+    var connectionStringResolver = serviceProvider.GetRequiredService<IConnectionStringResolver>();
+    string connectionString = connectionStringResolver.Resolve();
+    var connection = dbConnectionSharedSource[connectionString];
     if (connection == null) //连接不存在
     {
         //构造一个连接
-        connection = new MySqlConnection("server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true");
-        dbConnectionSharedSource["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"] = connection;
+        connection = new MySqlConnection(connectionString);
+        dbConnectionSharedSource[connectionString] = connection;
     }
     builder.UseMySql(connection, ServerVersion.AutoDetect(connection as MySqlConnection), null);//这里第三个参数可拓展 如果封装的话
 
@@ -83,14 +87,17 @@ builder.Services.AddScoped<DbContextOptions<OtherDbContext>>(serviceProvider =>
 {
     var builder = new DbContextOptionsBuilder<OtherDbContext>();
     var dbConnectionSharedSource = serviceProvider.GetRequiredService<DbConnectionSharedSource>();
-    var connection = dbConnectionSharedSource["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"];
+    //解析连接字符串
+    var connectionStringResolver = serviceProvider.GetRequiredService<IConnectionStringResolver>();
+    string connectionString = connectionStringResolver.Resolve();
+    var connection = dbConnectionSharedSource[connectionString];
     if (connection == null) //连接不存在
     {
         //构造一个连接
-        connection = new MySqlConnection("server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true");
-        dbConnectionSharedSource["server=localhost;uid=root;pwd=wy.023;port=3306;database=ods;Allow User Variables=True;IgnoreCommandTransaction=true"] = connection;
+        connection = new MySqlConnection(connectionString);
+        dbConnectionSharedSource[connectionString] = connection;
     }
-    builder.UseMySql(connection, ServerVersion.AutoDetect(connection as MySqlConnection),null);//这里第三个参数可拓展 如果封装的话
+    builder.UseMySql(connection, ServerVersion.AutoDetect(connection as MySqlConnection), null);//这里第三个参数可拓展 如果封装的话
 
     return builder.Options;
 
