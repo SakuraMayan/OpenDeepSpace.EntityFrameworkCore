@@ -46,7 +46,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// 连接字符串解析
         /// </summary>
         /// <returns></returns>
-        string Resolve();
+        string Resolve<TDbContext>();
 
     }
 }

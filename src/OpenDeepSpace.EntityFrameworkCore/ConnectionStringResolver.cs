@@ -49,7 +49,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
         
 
-        public string Resolve()
+        public string Resolve<TDbContext>()
         {
             return configuration.GetConnectionString("ods");
         }

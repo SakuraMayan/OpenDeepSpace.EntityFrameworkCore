@@ -69,7 +69,7 @@ builder.Services.AddScoped<DbContextOptions<CustomDbContext>>(serviceProvider =>
     var dbConnectionSharedSource = serviceProvider.GetRequiredService<DbConnectionSharedSource>();
     //解析连接字符串
     var connectionStringResolver = serviceProvider.GetRequiredService<IConnectionStringResolver>();
-    string connectionString = connectionStringResolver.Resolve();
+    string connectionString = connectionStringResolver.Resolve<CustomDbContext>();
     var connection = dbConnectionSharedSource[connectionString];
     if (connection == null) //连接不存在
     {
@@ -89,7 +89,7 @@ builder.Services.AddScoped<DbContextOptions<OtherDbContext>>(serviceProvider =>
     var dbConnectionSharedSource = serviceProvider.GetRequiredService<DbConnectionSharedSource>();
     //解析连接字符串
     var connectionStringResolver = serviceProvider.GetRequiredService<IConnectionStringResolver>();
-    string connectionString = connectionStringResolver.Resolve();
+    string connectionString = connectionStringResolver.Resolve<OtherDbContext>();
     var connection = dbConnectionSharedSource[connectionString];
     if (connection == null) //连接不存在
     {
