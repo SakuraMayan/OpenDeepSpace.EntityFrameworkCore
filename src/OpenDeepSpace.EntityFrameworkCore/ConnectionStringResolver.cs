@@ -51,7 +51,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
         public string Resolve<TDbContext>()
         {
-            return configuration.GetConnectionString("ods");
+            return configuration.GetConnectionString(typeof(TDbContext).FullName);
         }
     }
 }
