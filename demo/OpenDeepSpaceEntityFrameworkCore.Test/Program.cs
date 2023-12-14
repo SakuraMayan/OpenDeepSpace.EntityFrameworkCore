@@ -25,7 +25,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHangfire(
         opt =>
         {
-            opt.UseStorage(new MySqlStorage("Data Source=127.0.0.1;Initial Catalog=ods;User ID=root;Password=wy.023;Charset=utf8;Port=3306;Allow User Variables=true;", new MySqlStorageOptions()
+            opt.UseStorage(new MySqlStorage("Data Source=192.168.80.128;Initial Catalog=ods;User ID=root;Password=Mysql80:960325;Charset=utf8;Port=3306;Allow User Variables=true;", new MySqlStorageOptions()
             {
 
                 TablesPrefix = "hangfire"

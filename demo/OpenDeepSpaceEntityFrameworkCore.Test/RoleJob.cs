@@ -17,6 +17,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test
 
         public RoleJob(IRepository<CustomDbContext, Role> repo, IRepository<OtherDbContext, Role> otherRepo, IUnitOfWork unitOfWork, IServiceScopeFactory scopeFactory)
         {
+            //在后台Job中 这里又是新开了一个线程 相当于一次新的请求范围 所以形成了一个新实例unitOfWork
             _repo = repo;
             _otherRepo = otherRepo;
             _unitOfWork = unitOfWork;
