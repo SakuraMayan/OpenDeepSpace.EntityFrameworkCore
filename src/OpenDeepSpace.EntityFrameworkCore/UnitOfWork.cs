@@ -194,7 +194,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
             ///回滚事务 如果事务已回滚 在后续执行出现的错误中就不再回滚了 即使后续的同连接上下文存在SaveChanges操作
             ///上面提交事务<see cref="Commit"/>的时候也不会在提交对应的事务 也不会执行成功
             if (dbContextTransactionsStatus[dbContextTransaction] == DbContextTransactionStatus.RolledBack)
-                await Task.CompletedTask;
+                return;
             try
             { //尝试回滚
                 await dbContextTransaction.RollbackAsync();
