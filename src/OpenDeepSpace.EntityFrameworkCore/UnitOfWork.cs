@@ -62,6 +62,9 @@ namespace OpenDeepSpace.EntityFrameworkCore
         //数据库上下文对应事务所处状态
         public Dictionary<IDbContextTransaction,DbContextTransactionStatus> dbContextTransactionsStatus = new Dictionary<IDbContextTransaction,DbContextTransactionStatus>();
        
+        //失败事务的数据库上下文
+        public List<DbContext> failTransactionalDbContexts=new List<DbContext>();
+
         public Guid UnitOfWorkId { get; set; }
 
         ///工作单元选项不允许设置 只能通过<see cref="Initialize(IUnitOfWorkOptions)"/>来初始化 且一个相同工作单元实例只能初始化一次
@@ -394,6 +397,10 @@ namespace OpenDeepSpace.EntityFrameworkCore
                 //尝试执行数据库保存改变
                 try
                 {
+                    //如果存在失败的上下文集合 且当前的上下文连接与失败的上下文连接一致 就不在保存数据
+                    if (failTransactionalDbContexts.Exists(t => t.Database.GetDbConnection() == context.Database.GetDbConnection()))
+                        continue;
+
                     context.SaveChanges();//数据出问题会出异常
                 }
                 catch(Exception ex) //捕获到数据库保存改变异常
@@ -401,10 +408,14 @@ namespace OpenDeepSpace.EntityFrameworkCore
                     //输出日志
                     logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(SaveChanges)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
 
+                    //如果是需要事务 记录失败的上下文
+                    if (UnitOfWorkOptions == null || (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional))
+                        failTransactionalDbContexts.Add(context);
+
                     //回滚事务 并记录事务所处状态
                     //RollBackInternal(context.Database.CurrentTransaction);//通过context.Database.CurrentTransaction获取出的当前事务与记录的事务不一样即使共享事务所以我们直接通过连接从事务字典中取
-                    //if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
-                    //    RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
+                    if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
+                        RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
                 }
             }
         }
@@ -414,11 +425,16 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// </summary>
         private async Task SaveChangesAsync()
         {
+            
             foreach (var context in dbContexts.Values)
             {
                 //尝试执行数据库保存改变
                 try
                 {
+                    //如果存在失败的上下文集合 且当前的上下文连接与失败的上下文连接一致 就不在保存数据
+                    if (failTransactionalDbContexts.Exists(t=>t.Database.GetDbConnection()==context.Database.GetDbConnection()))
+                        continue;
+
                     await context.SaveChangesAsync();//数据出问题会出异常
                 }
                 catch (Exception ex) //捕获到数据库保存改变异常
@@ -426,10 +442,14 @@ namespace OpenDeepSpace.EntityFrameworkCore
                     //输出日志
                     logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(SaveChangesAsync)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
 
+                    //如果是需要事务 记录失败的上下文
+                    if (UnitOfWorkOptions==null || (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional))
+                        failTransactionalDbContexts.Add(context);
+
                     //回滚事务 并记录事务所处状态
                     //RollBackInternal(context.Database.CurrentTransaction);//通过context.Database.CurrentTransaction获取出的当前事务与记录的事务不一样即使共享事务所以我们直接通过连接从事务字典中取
-                    //if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
-                    //    RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
+                    if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
+                        RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
                 }
             }
         }

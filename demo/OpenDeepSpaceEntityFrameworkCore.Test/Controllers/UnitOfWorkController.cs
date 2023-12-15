@@ -87,8 +87,8 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 
 
             roleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
-            //roleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
-            roleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+            roleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+            //roleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
 
             unitOfWork.Commit();
 
@@ -110,6 +110,40 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 
             unitOfWork.Commit();
 
+        }
+
+
+        /// <summary>
+        /// 测试不同的上下文共享事务
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task TestDifferentDbContextShareAsync()
+        {
+
+            unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
+            await roleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+            await otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+            //await otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+
+            await unitOfWork.CommitAsync();
+        }
+
+        /// <summary>
+        /// 测试不同的上下文共享事务
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public void TestDiffDbContextShare()
+        {
+
+            //unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
+            roleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+            otherRoleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+            //otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+            
+
+            unitOfWork.Commit();
         }
 
         /// <summary>
