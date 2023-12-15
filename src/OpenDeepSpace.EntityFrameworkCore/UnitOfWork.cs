@@ -403,8 +403,8 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
                     //回滚事务 并记录事务所处状态
                     //RollBackInternal(context.Database.CurrentTransaction);//通过context.Database.CurrentTransaction获取出的当前事务与记录的事务不一样即使共享事务所以我们直接通过连接从事务字典中取
-                    if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
-                        RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
+                    //if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
+                    //    RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
                 }
             }
         }
@@ -428,8 +428,8 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
                     //回滚事务 并记录事务所处状态
                     //RollBackInternal(context.Database.CurrentTransaction);//通过context.Database.CurrentTransaction获取出的当前事务与记录的事务不一样即使共享事务所以我们直接通过连接从事务字典中取
-                    if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
-                        RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
+                    //if (dbContextTransactions.ContainsKey(context.Database.GetDbConnection()))//存在当前连接的事务才进行异常回滚 否则不会滚 出现这种情况是不使用手动管理事务 默认事务的时候
+                    //    RollBackInternal(dbContextTransactions[context.Database.GetDbConnection()]);
                 }
             }
         }
