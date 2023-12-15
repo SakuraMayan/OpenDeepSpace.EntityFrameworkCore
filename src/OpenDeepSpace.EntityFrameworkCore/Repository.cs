@@ -58,9 +58,9 @@ namespace OpenDeepSpace.EntityFrameworkCore
             return _unitOfWorkDbContextProvider.GetDbContext().Add(entity).Entity;
         }
 
-        public async Task<TEntity> InsertAsync(TEntity entity)
+        public async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return (await _unitOfWorkDbContextProvider.GetDbContextAsync()).AddAsync(entity).Result.Entity;    
+            return (await _unitOfWorkDbContextProvider.GetDbContextAsync()).AddAsync(entity,cancellationToken).Result.Entity;    
         }
     }
 }

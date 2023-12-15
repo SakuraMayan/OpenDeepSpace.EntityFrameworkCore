@@ -66,7 +66,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
                     
                     _customDbContext.SaveChanges();
 
-                    //_otherDbContext.Database.UseTransaction(trans.GetDbTransaction());//共享事务
+                    _otherDbContext.Database.UseTransaction(trans.GetDbTransaction());//共享事务
                     _otherDbContext.Add(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
 
 

@@ -59,7 +59,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        Task<TEntity> InsertAsync(TEntity entity);
+        Task<TEntity> InsertAsync(TEntity entity,CancellationToken cancellationToken=default(CancellationToken));
         
     }
 
