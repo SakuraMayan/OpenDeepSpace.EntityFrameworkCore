@@ -25,7 +25,11 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 
         IUnitOfWorkDbContextProvider<CustomDbContext> unitOfWorkDbContextProvider;
 
-        public UnitOfWorkController(IUnitOfWork unitOfWork, IRepository<CustomDbContext, Role> roleRepo, IRepository<OtherDbContext, Role> otherRoleRepo, IBackgroundJobManager backgroundJobManager, IServiceScopeFactory serviceScopeFactory, IUnitOfWorkDbContextProvider<CustomDbContext> unitOfWorkDbContextProvider)
+        CustomDbContext _customDbContext { get; set; }
+
+        OtherDbContext _otherDbContext { get; set; }
+
+        public UnitOfWorkController(IUnitOfWork unitOfWork, IRepository<CustomDbContext, Role> roleRepo, IRepository<OtherDbContext, Role> otherRoleRepo, IBackgroundJobManager backgroundJobManager, IServiceScopeFactory serviceScopeFactory, IUnitOfWorkDbContextProvider<CustomDbContext> unitOfWorkDbContextProvider, CustomDbContext customDbContext, OtherDbContext otherDbContext)
         {
             this.unitOfWork = unitOfWork;
             this.roleRepo = roleRepo;
@@ -33,6 +37,47 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
             this.backgroundJobManager = backgroundJobManager;
             this.serviceScopeFactory = serviceScopeFactory;
             this.unitOfWorkDbContextProvider = unitOfWorkDbContextProvider;
+            _customDbContext = customDbContext;
+            _otherDbContext = otherDbContext;
+        }
+
+        /// <summary>
+        /// 只要数据库共享连接就可以了还需要什么仓储模型吗,多此一举
+        /// </summary>
+        [HttpGet]
+        public void TestDifferentDbContextShareConn()
+        {
+
+           
+            
+            using (var trans = _customDbContext.Database.BeginTransaction())
+            {
+
+                try
+                {
+
+                    _customDbContext.Add(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+                    
+                    _customDbContext.SaveChanges();
+
+                    //_otherDbContext.Database.UseTransaction(trans.GetDbTransaction());//共享事务
+                    _otherDbContext.Add(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+
+
+
+                    _otherDbContext.SaveChanges();
+                
+                    trans.Commit();
+                }
+                catch (Exception ex)
+                {
+                    //trans.Rollback();
+
+                }
+
+            }
+            
+
         }
 
         [HttpGet]
@@ -76,9 +121,9 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
         {
             unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
 
+            await otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
             await roleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
             //await otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
-            await otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
 
             await unitOfWork.CommitAsync();
 
