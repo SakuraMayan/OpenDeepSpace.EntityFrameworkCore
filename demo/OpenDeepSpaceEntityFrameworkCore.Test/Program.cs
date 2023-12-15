@@ -130,6 +130,8 @@ builder.Services.AddScoped(typeof(IUnitOfWorkDbContextProvider<>), typeof(UnitOf
 //默认的上下文指定注入
 //builder.Services.AddScoped(typeof(IRepository<>).MakeGenericType(typeof(Role)), typeof(Repository<,>).MakeGenericType(typeof(CustomDbContext), typeof(Role)));
 
+//服务注入
+builder.Services.AddTransient<IRoleService, RoleService>();
 
 var app = builder.Build();
 

@@ -29,7 +29,11 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 
         OtherDbContext _otherDbContext { get; set; }
 
-        public UnitOfWorkController(IUnitOfWork unitOfWork, IRepository<CustomDbContext, Role> roleRepo, IRepository<OtherDbContext, Role> otherRoleRepo, IBackgroundJobManager backgroundJobManager, IServiceScopeFactory serviceScopeFactory, IUnitOfWorkDbContextProvider<CustomDbContext> unitOfWorkDbContextProvider, CustomDbContext customDbContext, OtherDbContext otherDbContext)
+        IRoleService roleService;
+
+        IRoleService roleService2;
+
+        public UnitOfWorkController(IUnitOfWork unitOfWork, IRepository<CustomDbContext, Role> roleRepo, IRepository<OtherDbContext, Role> otherRoleRepo, IBackgroundJobManager backgroundJobManager, IServiceScopeFactory serviceScopeFactory, IUnitOfWorkDbContextProvider<CustomDbContext> unitOfWorkDbContextProvider, CustomDbContext customDbContext, OtherDbContext otherDbContext, IRoleService roleService, IRoleService roleService2)
         {
             this.unitOfWork = unitOfWork;
             this.roleRepo = roleRepo;
@@ -39,6 +43,8 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
             this.unitOfWorkDbContextProvider = unitOfWorkDbContextProvider;
             _customDbContext = customDbContext;
             _otherDbContext = otherDbContext;
+            this.roleService = roleService;
+            this.roleService2 = roleService2;
         }
 
         /// <summary>
@@ -136,11 +142,16 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
         [HttpGet]
         public void TestDiffDbContextShare()
         {
-
+            
             //unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
+
+            roleService.AddRole(new Role());
+            roleService2.AddRole(new Role());
+
             roleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
-            otherRoleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
-            //otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+            //otherRoleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+            otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+            //otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
             
 
             unitOfWork.Commit();

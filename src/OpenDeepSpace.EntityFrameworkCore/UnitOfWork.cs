@@ -426,6 +426,9 @@ namespace OpenDeepSpace.EntityFrameworkCore
         private async Task SaveChangesAsync()
         {
             
+            //TODO:存在一个问题 如果这里统一提交数据 在不开启事务的情况下 不是没执行一次就提交一个SaveChanges会出现数据一会多一会少的情况
+            //这个问题 可能SaveChanges需要放到仓储里面即时提交 但是放到仓储里面即时提交又会出现 如果第一个错误 后面的就无法保存的情况
+            //还是说就考虑存在事务的情况 事务不存在的情况不考虑他就行了
             foreach (var context in dbContexts.Values)
             {
                 //尝试执行数据库保存改变
