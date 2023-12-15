@@ -299,11 +299,11 @@ namespace OpenDeepSpace.EntityFrameworkCore
             ///事务将是EFCORE默认事务(默认事务没有调用<see cref="DbContext.Database.AutoTransactionsEnabled"/>设置为false来进行关闭此时进行默认事务)
             ///然又由于提交<see cref="Commit"/>事务的时候 执行<see cref="SaveChanges"/>是按照每个上下文实例循环调用<see cref="DbContext.SaveChanges()"/>也就是说每调用一次就执行一次默认事务并提交数据到数据库
             ///因此每一个数据库实例的操作，即每一<see cref="Repository{TDbContext, TEntity}"/>的方法调用是处于一个单独的事务
-            if (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional == false)
+            /*if (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional == false)
             { 
                 dbContext.Database.AutoTransactionsEnabled = false;//不开启事务 连手动事务都关闭
                 return;
-            }
+            }*/
             
 
             //工作单元选项为空 或 工作单元选项不为空且需要开启事务 才开启事务
@@ -351,11 +351,11 @@ namespace OpenDeepSpace.EntityFrameworkCore
             ///事务将是EFCORE默认事务(默认事务没有调用<see cref="DbContext.Database.AutoTransactionsEnabled"/>设置为false来进行关闭此时进行默认事务)
             ///然又由于提交<see cref="Commit"/>事务的时候 执行<see cref="SaveChanges"/>是按照每个上下文实例循环调用<see cref="DbContext.SaveChanges()"/>也就是说每调用一次就执行一次默认事务并提交数据到数据库
             ///因此每一个数据库实例的操作，即每一<see cref="Repository{TDbContext, TEntity}"/>的方法调用是处于一个单独的事务
-            if (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional == false)
+            /*if (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional == false)
             {
                 dbContext.Database.AutoTransactionsEnabled = false;//不开启事务 连手动事务都关闭
                 return;
-            }
+            }*/
 
 
             //工作单元选项为空 或 工作单元选项不为空且需要开启事务 才开启事务
@@ -409,7 +409,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
                     logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(SaveChanges)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
 
                     //如果是需要事务 记录失败的上下文
-                    if (UnitOfWorkOptions == null || (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional))
+                    //if (UnitOfWorkOptions == null || (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional))
                         failTransactionalDbContexts.Add(context);
 
                     //回滚事务 并记录事务所处状态
@@ -446,7 +446,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
                     logger.LogError($"{typeof(UnitOfWork).FullName}-{UnitOfWorkId}-{nameof(SaveChangesAsync)}-{DateTime.Now}:{ex.Message}{ex.StackTrace}{ex.InnerException?.Message}{ex.InnerException?.StackTrace}");
 
                     //如果是需要事务 记录失败的上下文
-                    if (UnitOfWorkOptions==null || (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional))
+                    //if (UnitOfWorkOptions==null || (UnitOfWorkOptions != null && UnitOfWorkOptions.IsTransactional))
                         failTransactionalDbContexts.Add(context);
 
                     //回滚事务 并记录事务所处状态

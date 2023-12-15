@@ -23,7 +23,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test
             _unitOfWork = unitOfWork;
 
             //不开启事务
-            _unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });
+            //_unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });
             _scopeFactory = scopeFactory;
         }
 

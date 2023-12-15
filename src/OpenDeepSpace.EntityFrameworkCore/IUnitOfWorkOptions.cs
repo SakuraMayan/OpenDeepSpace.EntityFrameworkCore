@@ -50,7 +50,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// 是否开启事务 主要指的是否手动管理事务 如果不开启手动管理事务 那么就是EFCORE默认事务 即SaveChanges一次就提交一次事务 
         /// 或把EFCORE默认事务也关闭了 SaveChanges调用一次也会保存到数据库
         /// </summary>
-        bool IsTransactional { get; }
+        //bool IsTransactional { get; }
 
         /// <summary>
         /// 数据库隔离级别 针对开始事务阶段隔离级别的设置

@@ -40,7 +40,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
 {
     public class UnitOfWorkOptions : IUnitOfWorkOptions
     {
-        public bool IsTransactional { get; set; } = true;//默认值为true开启事务
+        //public bool IsTransactional { get; set; } = true;//默认值为true开启事务
 
         public IsolationLevel? IsolationLevel { get; set; }
 

@@ -127,7 +127,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
         public async Task TestDifferentDbContextShareAsync()
         {
 
-            unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
+            //unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
             await roleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
             await otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
             //await otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
@@ -164,7 +164,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
         [HttpGet]
         public async Task TestUnitOfWorkAsyncOp()
         {
-            unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
+            //unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
 
             await otherRoleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
             await roleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
@@ -228,7 +228,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
         public async Task TestIsTransactionalEqFalse()
         {
 
-            unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
+            //unitOfWork.Initialize(new UnitOfWorkOptions() { IsTransactional = false });//不开启事务
 
             //同一上下文实例一次SaveChanges 一次事务
             await roleRepo.InsertAsync(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
