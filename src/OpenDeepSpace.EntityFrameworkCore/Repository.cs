@@ -84,6 +84,40 @@ namespace OpenDeepSpace.EntityFrameworkCore
             await (await _unitOfWorkDbContextProvider.GetDbContextAsync()).AddRangeAsync(entities, cancellationToken);
         }
 
+        public TEntity Update(TEntity entity)
+        {
+            return _unitOfWorkDbContextProvider.GetDbContext().Update(entity).Entity;
+        }
+
+        public void Update(params TEntity[] entities)
+        {
+            _unitOfWorkDbContextProvider.GetDbContext().UpdateRange(entities);
+        }
+
+        public void Update(IEnumerable<TEntity> entities)
+        {
+            _unitOfWorkDbContextProvider.GetDbContext().UpdateRange(entities);
+        }
+
+        
+
+        public void Delete(TEntity entity)
+        {
+
+            _unitOfWorkDbContextProvider.GetDbContext().Remove(entity);
+        }
+
+        public void Delete(params TEntity[] entities)
+        {
+            _unitOfWorkDbContextProvider.GetDbContext().RemoveRange(entities);
+        }
+
+        public void Delete(IEnumerable<TEntity> entities)
+        {
+            _unitOfWorkDbContextProvider.GetDbContext().RemoveRange(entities);
+        }
+
+
         public TEntity Update(TEntity entity, Expression<Func<TEntity, object>>[] updateProperties = null)
         {
 
@@ -102,7 +136,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
                 return _unitOfWorkDbContextProvider.GetDbContext().Update(entity).Entity;
 
             }
-            
+
         }
 
         public void Update(Expression<Func<TEntity, object>>[] updateProperties = null, params TEntity[] entities)
@@ -136,20 +170,19 @@ namespace OpenDeepSpace.EntityFrameworkCore
             UpdateInternal(updateProperties, entities.ToArray());
         }
 
-        public void Delete(TEntity entity)
+        public void Delete(TEntity entity, bool ignoreSoftDelete = false)
         {
-
-            _unitOfWorkDbContextProvider.GetDbContext().Remove(entity);
+            throw new NotImplementedException();
         }
 
-        public void Delete(params TEntity[] entities)
+        public void Delete(bool ignoreSoftDelete = false, params TEntity[] entities)
         {
-            _unitOfWorkDbContextProvider.GetDbContext().RemoveRange(entities);
+            throw new NotImplementedException();
         }
 
-        public void Delete(IEnumerable<TEntity> entities)
+        public void Delete(IEnumerable<TEntity> entities, bool ignoreSoftDelete = false)
         {
-            _unitOfWorkDbContextProvider.GetDbContext().RemoveRange(entities);
+            throw new NotImplementedException();
         }
     }
 }

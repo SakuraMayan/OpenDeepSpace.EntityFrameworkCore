@@ -51,6 +51,9 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
         public string Resolve<TDbContext>()
         {
+
+
+            //优先从配置的ConnectionStrings中读取
             return configuration.GetConnectionString(typeof(TDbContext).FullName);
         }
     }

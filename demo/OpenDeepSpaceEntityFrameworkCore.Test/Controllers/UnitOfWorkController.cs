@@ -263,6 +263,34 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
         /// 测试更新
         /// </summary>
         [HttpPost]
+        public void TestNormalUpdate(Role role)
+        {
+            
+            roleRepo.Update(role);
+
+
+            unitOfWork.Commit();
+        }
+
+        /// <summary>
+        /// 测试批量更新
+        /// </summary>
+        /// <param name="roles"></param>
+        [HttpPost]
+        public void TestNormalBatchUpdate(List<Role> roles)
+        {
+
+          
+
+            roleRepo.Update(roles.ToArray());
+
+            unitOfWork.Commit();
+        }
+
+        /// <summary>
+        /// 测试更新
+        /// </summary>
+        [HttpPost]
         public void TestUpdate(Role role)
         { 
             //部分字段更新的表达式树数组
@@ -298,6 +326,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 
             unitOfWork.Commit();
         }
+
 
 
         /// <summary>

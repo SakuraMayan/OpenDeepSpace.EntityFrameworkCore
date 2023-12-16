@@ -94,7 +94,49 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// <returns></returns>
         Task InsertAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default(CancellationToken));
 
+        /// <summary>
+        /// 更新实体
+        /// </summary>
+        /// <param name="entity"></param>
+        TEntity Update(TEntity entity);
 
+        /// <summary>
+        /// 更新多个实体
+        /// </summary>
+        /// <param name="entities"></param>
+        void Update(params TEntity[] entities);
+
+
+        /// <summary>
+        /// 更新实体集合
+        /// </summary>
+        /// <param name="entities"></param>
+        void Update(IEnumerable<TEntity> entities);
+
+
+        /// <summary>
+        /// 删除实体
+        /// </summary>
+        /// <param name="entity"></param>
+        void Delete(TEntity entity);
+
+        /// <summary>
+        /// 删除多个实体
+        /// </summary>
+        /// <param name="entities"></param>
+        void Delete(params TEntity[] entities);
+
+        /// <summary>
+        /// 删除实体集合
+        /// </summary>
+        /// <param name="entities"></param>
+        void Delete(IEnumerable<TEntity> entities);
+
+
+
+
+        //在efcore的CRUD操作之上 增加有关逻辑的可能的CRUD操作
+        //TODO:增加忽略软删除的删除操作
         /// <summary>
         /// 更新实体
         /// </summary>
@@ -117,23 +159,28 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// <param name="updateProperties">指定需要更新的部分属性</param>
         void Update(IEnumerable<TEntity> entities, Expression<Func<TEntity, object>>[] updateProperties = null);
 
+
         /// <summary>
         /// 删除实体
         /// </summary>
         /// <param name="entity"></param>
-        void Delete(TEntity entity);
+        /// <param name="ignoreSoftDelete">在存在软删除情况下 忽略软删除 如果设置为<see cref="true"/>表示直接硬删除 不考虑软删除</param>
+        void Delete(TEntity entity, bool ignoreSoftDelete = false);
 
         /// <summary>
         /// 删除多个实体
         /// </summary>
+        /// <param name="ignoreSoftDelete">在存在软删除情况下 忽略软删除 如果设置为<see cref="true"/>表示直接硬删除 不考虑软删除</param>
         /// <param name="entities"></param>
-        void Delete(params TEntity[] entities);
+        void Delete(bool ignoreSoftDelete = false,params TEntity[] entities);
 
         /// <summary>
         /// 删除实体集合
         /// </summary>
         /// <param name="entities"></param>
-        void Delete(IEnumerable<TEntity> entities);
+        /// <param name="ignoreSoftDelete">在存在软删除情况下 忽略软删除 如果设置为<see cref="true"/>表示直接硬删除 不考虑软删除</param>
+        void Delete(IEnumerable<TEntity> entities, bool ignoreSoftDelete = false);
+
     }
 
     /// <summary>
