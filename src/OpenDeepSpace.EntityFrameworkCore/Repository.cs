@@ -101,10 +101,10 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
         
 
-        public void Delete(TEntity entity)
+        public TEntity Delete(TEntity entity)
         {
 
-            _unitOfWorkDbContextProvider.GetDbContext().Remove(entity);
+            return _unitOfWorkDbContextProvider.GetDbContext().Remove(entity).Entity;
         }
 
         public void Delete(params TEntity[] entities)

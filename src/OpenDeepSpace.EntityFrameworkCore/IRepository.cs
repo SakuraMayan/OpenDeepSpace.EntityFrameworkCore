@@ -118,7 +118,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// 删除实体
         /// </summary>
         /// <param name="entity"></param>
-        void Delete(TEntity entity);
+        TEntity Delete(TEntity entity);
 
         /// <summary>
         /// 删除多个实体
