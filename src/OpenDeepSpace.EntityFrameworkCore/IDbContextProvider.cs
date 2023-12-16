@@ -40,6 +40,17 @@ namespace OpenDeepSpace.EntityFrameworkCore
 {
     public interface IDbContextProvider<TDbContext> where TDbContext:DbContext
     {
+        /// <summary>
+        /// 获取上下文
+        /// </summary>
+        /// <returns></returns>
         TDbContext GetDbContext();
+
+        /// <summary>
+        /// 获取上下文
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<TDbContext> GetDbContextAsync(CancellationToken cancellationToken=default(CancellationToken));
     }
 }

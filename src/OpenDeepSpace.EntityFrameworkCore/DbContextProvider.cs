@@ -60,5 +60,12 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
             return _dbContext;
         }
+
+        public async Task<TDbContext> GetDbContextAsync(CancellationToken cancellationToken = default)
+        {
+
+            await transactionManager.AddDbContextWithBeginTransactionAsync(_dbContext, cancellationToken);
+            return _dbContext;
+        }
     }
 }

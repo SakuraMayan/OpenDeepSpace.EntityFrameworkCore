@@ -39,7 +39,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
             otherDbContext.SaveChanges();
 
             //提交事务
-            this.transactionManager.Commit();   
+            this.transactionManager.CommitAsync(default,customDbContext);   
         }
 
     }

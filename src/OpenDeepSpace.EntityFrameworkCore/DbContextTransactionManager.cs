@@ -82,9 +82,45 @@ namespace OpenDeepSpace.EntityFrameworkCore
             dbContexts.Add(dbContext);
         }
 
+        public async Task AddDbContextWithBeginTransactionAsync(DbContext dbContext,CancellationToken cancellationToken=default)
+        {
+            IDbContextTransaction dbContextTransaction = null;
+
+            foreach (var _dbContext in dbContexts)
+            {
+
+                //共享连接 那么就共享事务
+                if (_dbContext.Database.GetDbConnection() == dbContext.Database.GetDbConnection())
+                {
+                    dbContextTransaction = dbContextTransactionDic[_dbContext];
+                    await dbContext.Database.UseTransactionAsync(dbContextTransaction.GetDbTransaction(),cancellationToken);
+                    break;
+                }
+
+            }
+
+            //开启手动管理事务
+            if (dbContextTransaction == null)
+                dbContextTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
+
+            //事务加入到数据库对应事务的字典中
+            dbContextTransactionDic[dbContext] = dbContextTransaction;
+
+            //记录当前事务状态
+            dbContextTransactionStatusDic[dbContextTransaction] = DbContextTransactionStatus.Started;
+
+            //当前上下文加入
+            dbContexts.Add(dbContext);
+        }
+
         public void Commit()
         {
-            foreach (var dbContextTransactional in dbContextTransactionDic.Values)
+            CommitInternal(dbContextTransactionDic.Values);
+        }
+
+        private void CommitInternal(IEnumerable<IDbContextTransaction> dbContextTransactions)
+        {
+            foreach (var dbContextTransactional in dbContextTransactions)
             {
                 //当前事务已经提交或回滚
                 if (dbContextTransactionStatusDic[dbContextTransactional] == DbContextTransactionStatus.Commited
@@ -107,13 +143,60 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
 
                     try
-                    { 
+                    {
                         //尝试回滚事务
                         dbContextTransactional.Rollback();
                         //改变事务状态为已回滚
                         dbContextTransactionStatusDic[dbContextTransactional] = DbContextTransactionStatus.RolledBack;
                     }
-                    catch 
+                    catch
+                    {
+                        dbContextTransactionStatusDic[dbContextTransactional] = DbContextTransactionStatus.Failed;
+                    }
+
+
+                }
+
+            }
+        }
+
+        public async Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            await CommitInternalAsync(dbContextTransactionDic.Values,cancellationToken);
+        }
+
+        private async Task CommitInternalAsync(IEnumerable<IDbContextTransaction> dbContextTransactions,CancellationToken cancellationToken=default)
+        {
+            foreach (var dbContextTransactional in dbContextTransactions)
+            {
+                //当前事务已经提交或回滚
+                if (dbContextTransactionStatusDic[dbContextTransactional] == DbContextTransactionStatus.Commited
+                    ||
+                    dbContextTransactionStatusDic[dbContextTransactional] == DbContextTransactionStatus.RolledBack
+                    )
+                    continue;
+
+                try
+                {
+
+                    //尝试提交事务
+                    await dbContextTransactional.CommitAsync(cancellationToken);
+                    //改变事务状态为已提交
+                    dbContextTransactionStatusDic[dbContextTransactional] = DbContextTransactionStatus.Commited;
+
+                }
+                catch
+                { //出现异常回滚事务
+
+
+                    try
+                    {
+                        //尝试回滚事务
+                        await dbContextTransactional.RollbackAsync(cancellationToken);
+                        //改变事务状态为已回滚
+                        dbContextTransactionStatusDic[dbContextTransactional] = DbContextTransactionStatus.RolledBack;
+                    }
+                    catch
                     {
                         dbContextTransactionStatusDic[dbContextTransactional] = DbContextTransactionStatus.Failed;
                     }
@@ -126,12 +209,26 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
         public void Commit(params DbContext[] dbContexts)
         {
-            throw new NotImplementedException();
+            //筛选出符合的数据库上下文事务字典集合
+            IEnumerable<IDbContextTransaction> dbContextTransactions = dbContextTransactionDic.Where(kv => dbContexts.ToList().Exists(db=>db == kv.Key)).Select(t=>t.Value);
+            CommitInternal(dbContextTransactions);
+            
         }
 
         public void Commit(IEnumerable<DbContext> dbContexts)
         {
-            throw new NotImplementedException();
+            Commit(dbContexts.ToArray());
+        }
+
+        public async Task CommitAsync(CancellationToken cancellationToken = default, params DbContext[] dbContexts)
+        {
+            await CommitAsync(dbContexts.ToArray(), cancellationToken);
+        }
+
+        public async Task CommitAsync(IEnumerable<DbContext> dbContexts, CancellationToken cancellationToken = default)
+        {
+            IEnumerable<IDbContextTransaction> dbContextTransactions = dbContextTransactionDic.Where(kv => dbContexts.ToList().Exists(db => db == kv.Key)).Select(t => t.Value);
+            await CommitInternalAsync(dbContextTransactions, cancellationToken);
         }
     }
 }

@@ -51,9 +51,22 @@ namespace OpenDeepSpace.EntityFrameworkCore
         void AddDbContextWithBeginTransaction(DbContext dbContext);
 
         /// <summary>
+        /// 添加数据库上下文并开启事务
+        /// </summary>
+        /// <param name="dbContext"></param>
+        /// <param name="cancellationToken"></param>
+        Task AddDbContextWithBeginTransactionAsync(DbContext dbContext,CancellationToken cancellationToken=default(CancellationToken));
+
+        /// <summary>
         /// 提交所有数据库事务
         /// </summary>
         void Commit();
+
+        /// <summary>
+        /// 提交所有数据库事务
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        Task CommitAsync(CancellationToken cancellationToken=default(CancellationToken));
 
         /// <summary>
         /// 提交事务
@@ -64,7 +77,22 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// <summary>
         /// 提交事务
         /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <param name="dbContexts">指定提交哪些数据库的事务</param>
+        Task CommitAsync(CancellationToken cancellationToken = default(CancellationToken),params DbContext[] dbContexts);
+
+
+        /// <summary>
+        /// 提交事务
+        /// </summary>
         /// <param name="dbContexts">指定提交事务的数据库的集合</param>
         void Commit(IEnumerable<DbContext> dbContexts);
+
+        /// <summary>
+        /// 提交事务
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <param name="dbContexts">指定提交事务的数据库的集合</param>
+        Task CommitAsync(IEnumerable<DbContext> dbContexts, CancellationToken cancellationToken = default(CancellationToken));
     }
 }
