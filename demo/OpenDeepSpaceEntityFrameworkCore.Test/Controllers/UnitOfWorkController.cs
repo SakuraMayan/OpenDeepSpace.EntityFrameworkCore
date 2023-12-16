@@ -298,6 +298,33 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 
             unitOfWork.Commit();
         }
+
+
+        /// <summary>
+        /// 测试删除实体
+        /// </summary>
+        /// <param name="role"></param>
+        [HttpPost]
+        public void TestDelete(Role role)
+        { 
+            roleRepo.Delete(role);
+            unitOfWork.Commit();
+        }
+
+
+        /// <summary>
+        /// 测试批量删除
+        /// </summary>
+        /// <param name="roles"></param>
+        [HttpPost]
+        public void TestBatchDelete(List<Role> roles)
+        {
+
+            roleRepo.Delete(roles);
+
+            unitOfWork.Commit();
+
+        }
     
     }
 }

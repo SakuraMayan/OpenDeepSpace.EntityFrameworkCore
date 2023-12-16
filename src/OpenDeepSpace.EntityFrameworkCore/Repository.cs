@@ -135,5 +135,21 @@ namespace OpenDeepSpace.EntityFrameworkCore
         {
             UpdateInternal(updateProperties, entities.ToArray());
         }
+
+        public void Delete(TEntity entity)
+        {
+
+            _unitOfWorkDbContextProvider.GetDbContext().Remove(entity);
+        }
+
+        public void Delete(params TEntity[] entities)
+        {
+            _unitOfWorkDbContextProvider.GetDbContext().RemoveRange(entities);
+        }
+
+        public void Delete(IEnumerable<TEntity> entities)
+        {
+            _unitOfWorkDbContextProvider.GetDbContext().RemoveRange(entities);
+        }
     }
 }
