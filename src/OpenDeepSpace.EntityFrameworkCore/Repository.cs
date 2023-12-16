@@ -58,9 +58,29 @@ namespace OpenDeepSpace.EntityFrameworkCore
             return _unitOfWorkDbContextProvider.GetDbContext().Add(entity).Entity;
         }
 
-        public async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default(CancellationToken))
+        public void Insert(params TEntity[] entities)
+        {
+            _unitOfWorkDbContextProvider.GetDbContext().AddRange(entities);
+        }
+
+        public void Insert(IEnumerable<TEntity> entities)
+        {
+            _unitOfWorkDbContextProvider.GetDbContext().AddRange(entities);
+        }
+
+        public async Task<TEntity> InsertAsync(TEntity entity, CancellationToken cancellationToken = default)
         {
             return (await _unitOfWorkDbContextProvider.GetDbContextAsync()).AddAsync(entity,cancellationToken).Result.Entity;    
+        }
+
+        public async Task InsertAsync(CancellationToken cancellationToken = default, params TEntity[] entities)
+        {
+            await (await _unitOfWorkDbContextProvider.GetDbContextAsync()).AddRangeAsync(entities,cancellationToken);
+        }
+
+        public async Task InsertAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)
+        {
+            await (await _unitOfWorkDbContextProvider.GetDbContextAsync()).AddRangeAsync(entities, cancellationToken);
         }
     }
 }

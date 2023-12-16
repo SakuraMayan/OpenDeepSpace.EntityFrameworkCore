@@ -60,7 +60,38 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// <param name="entity"></param>
         /// <returns></returns>
         Task<TEntity> InsertAsync(TEntity entity,CancellationToken cancellationToken=default(CancellationToken));
-        
+
+
+        /// <summary>
+        /// 添加实体集合
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <returns></returns>
+        void Insert(params TEntity[] entities);
+
+        /// <summary>
+        /// 异步添加实体集合
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <param name="entities"></param>
+        /// <returns></returns>
+        Task InsertAsync(CancellationToken cancellationToken = default(CancellationToken), params TEntity[] entities);
+
+
+        /// <summary>
+        /// 添加实体集合
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <returns></returns>
+        void Insert(IEnumerable<TEntity> entities);
+
+        /// <summary>
+        /// 异步添加实体集合
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task InsertAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default(CancellationToken));
     }
 
     /// <summary>

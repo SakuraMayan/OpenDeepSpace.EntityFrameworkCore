@@ -239,5 +239,24 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 
             await unitOfWork.CommitAsync();
         }
+
+
+        /// <summary>
+        /// 测试批量添加数据的仓储
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task BatchInsert()
+        {
+            roleRepo.Insert(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" }, new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+            await otherRoleRepo.InsertAsync(default,new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" }, new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+
+            //otherRoleRepo.Insert(new List<Role>() { new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" }, new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" } });
+            otherRoleRepo.Insert(new List<Role>() { new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" }, new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}{Guid.NewGuid()}" } });
+            await roleRepo.InsertAsync(new List<Role>() { new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" }, new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" } });
+
+            await unitOfWork.CommitAsync();
+        }
+    
     }
 }
