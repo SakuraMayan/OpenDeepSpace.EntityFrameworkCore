@@ -133,6 +133,9 @@ builder.Services.AddScoped(typeof(IUnitOfWorkDbContextProvider<>), typeof(UnitOf
 //服务注入
 builder.Services.AddTransient<IRoleService, RoleService>();
 
+//注入事务管理器
+builder.Services.AddScoped<IDbContextTransactionManager, DbContextTransactionManager>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
