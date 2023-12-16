@@ -45,6 +45,8 @@ namespace OpenDeepSpace.EntityFrameworkCore
     public interface IDbContextTransactionManager
     {
 
+        Guid _transactionManagerId { get; set; }
+
         /// <summary>
         /// 添加数据库上下文并开启事务
         /// </summary>

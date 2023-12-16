@@ -51,6 +51,13 @@ namespace OpenDeepSpace.EntityFrameworkCore
         //记录事务对应的状态
         public Dictionary<IDbContextTransaction, DbContextTransactionStatus> dbContextTransactionStatusDic = new Dictionary<IDbContextTransaction, DbContextTransactionStatus>();
 
+        public Guid _transactionManagerId { get; set; }
+
+        public DbContextTransactionManager()
+        {
+            _transactionManagerId = Guid.NewGuid();
+        }
+
         public void AddDbContextWithBeginTransaction(DbContext dbContext)
         {
             IDbContextTransaction dbContextTransaction = null;
