@@ -169,20 +169,5 @@ namespace OpenDeepSpace.EntityFrameworkCore
         {
             UpdateInternal(updateProperties, entities.ToArray());
         }
-
-        public void Delete(TEntity entity, bool ignoreSoftDelete = false)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(bool ignoreSoftDelete = false, params TEntity[] entities)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Delete(IEnumerable<TEntity> entities, bool ignoreSoftDelete = false)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

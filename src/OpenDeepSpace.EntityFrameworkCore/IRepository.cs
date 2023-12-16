@@ -136,7 +136,6 @@ namespace OpenDeepSpace.EntityFrameworkCore
 
 
         //在efcore的CRUD操作之上 增加有关逻辑的可能的CRUD操作
-        //TODO:增加忽略软删除的删除操作
         /// <summary>
         /// 更新实体
         /// </summary>
@@ -160,7 +159,7 @@ namespace OpenDeepSpace.EntityFrameworkCore
         void Update(IEnumerable<TEntity> entities, Expression<Func<TEntity, object>>[] updateProperties = null);
 
 
-        /// <summary>
+        /*/// <summary>
         /// 删除实体
         /// </summary>
         /// <param name="entity"></param>
@@ -180,6 +179,19 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// <param name="entities"></param>
         /// <param name="ignoreSoftDelete">在存在软删除情况下 忽略软删除 如果设置为<see cref="true"/>表示直接硬删除 不考虑软删除</param>
         void Delete(IEnumerable<TEntity> entities, bool ignoreSoftDelete = false);
+
+        /// <summary>
+        /// 根据单个主键id删除实体
+        /// </summary>
+        /// <param name="id"></param>
+        void Delete(object id);
+
+        /// <summary>
+        /// 根据单个主键id删除实体
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="ignoreSoftDelete">在存在软删除情况下 忽略软删除 如果设置为<see cref="true"/>表示直接硬删除 不考虑软删除</param>
+        void Delete(object id, bool ignoreSoftDelete);*/
 
     }
 
