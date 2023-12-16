@@ -7,6 +7,7 @@ using MySqlConnector;
 using OpenDeepSpace.EntityFrameworkCore;
 using OpenDeepSpace.NetCore.Hangfire;
 using System.Data.SqlClient;
+using System.Linq.Expressions;
 
 namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 {
@@ -256,6 +257,25 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
             await roleRepo.InsertAsync(new List<Role>() { new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" }, new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" } });
 
             await unitOfWork.CommitAsync();
+        }
+
+        /// <summary>
+        /// 测试更新
+        /// </summary>
+        [HttpPost]
+        public void TestUpdate(Role role)
+        { 
+            //部分字段更新的表达式树数组
+            Expression<Func<Role, object>>[] expressions = {
+
+                p=>p.RoleName,
+                p=>p.RoleDescription,
+                
+            };
+            roleRepo.Update(role,expressions);
+
+
+            unitOfWork.Commit();
         }
     
     }

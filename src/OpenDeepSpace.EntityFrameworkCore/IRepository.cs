@@ -33,6 +33,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -92,6 +93,16 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task InsertAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default(CancellationToken));
+
+
+        /// <summary>
+        /// 更新实体
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <param name="updateProperties">指定需要更新的部分属性</param>
+        TEntity Update(TEntity entity, Expression<Func<TEntity, object>>[] updateProperties = null);
+
+        
     }
 
     /// <summary>

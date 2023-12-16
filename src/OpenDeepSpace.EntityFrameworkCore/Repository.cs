@@ -33,6 +33,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -82,5 +83,29 @@ namespace OpenDeepSpace.EntityFrameworkCore
         {
             await (await _unitOfWorkDbContextProvider.GetDbContextAsync()).AddRangeAsync(entities, cancellationToken);
         }
+
+        public TEntity Update(TEntity entity, Expression<Func<TEntity, object>>[] updateProperties = null)
+        {
+
+            //需要更新的字段
+            if (updateProperties != null)
+            {
+                foreach (var property in updateProperties)
+                {
+                    _unitOfWorkDbContextProvider.GetDbContext().Entry(entity).Property(property).IsModified = true;
+                }
+                return entity;
+            }
+            else
+            {
+                //整体更新
+                return _unitOfWorkDbContextProvider.GetDbContext().Update(entity).Entity;
+
+            }
+            
+        }
+
+     
+
     }
 }
