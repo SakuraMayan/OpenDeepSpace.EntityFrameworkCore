@@ -7,6 +7,7 @@ using MySqlConnector;
 using OpenDeepSpace.EntityFrameworkCore;
 using OpenDeepSpace.NetCore.Hangfire;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Linq.Expressions;
 
 namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
@@ -25,6 +26,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
         IServiceScopeFactory serviceScopeFactory;
 
         IUnitOfWorkDbContextProvider<CustomDbContext> unitOfWorkDbContextProvider;
+        IUnitOfWorkDbContextProvider<OtherDbContext> otherDbContextProvider;
 
         CustomDbContext _customDbContext { get; set; }
 
@@ -34,7 +36,7 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 
         IRoleService roleService2;
 
-        public UnitOfWorkController(IUnitOfWork unitOfWork, IRepository<CustomDbContext, Role> roleRepo, IRepository<OtherDbContext, Role> otherRoleRepo, IBackgroundJobManager backgroundJobManager, IServiceScopeFactory serviceScopeFactory, IUnitOfWorkDbContextProvider<CustomDbContext> unitOfWorkDbContextProvider, CustomDbContext customDbContext, OtherDbContext otherDbContext, IRoleService roleService, IRoleService roleService2)
+        public UnitOfWorkController(IUnitOfWork unitOfWork, IRepository<CustomDbContext, Role> roleRepo, IRepository<OtherDbContext, Role> otherRoleRepo, IBackgroundJobManager backgroundJobManager, IServiceScopeFactory serviceScopeFactory, IUnitOfWorkDbContextProvider<CustomDbContext> unitOfWorkDbContextProvider, CustomDbContext customDbContext, OtherDbContext otherDbContext, IRoleService roleService, IRoleService roleService2, IUnitOfWorkDbContextProvider<OtherDbContext> otherDbContextProvider)
         {
             this.unitOfWork = unitOfWork;
             this.roleRepo = roleRepo;
@@ -46,6 +48,26 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
             _otherDbContext = otherDbContext;
             this.roleService = roleService;
             this.roleService2 = roleService2;
+            this.otherDbContextProvider = otherDbContextProvider;
+        }
+
+
+        /// <summary>
+        /// 测试不使用仓储模式的共享事务 借助工作单元上下文提供者
+        /// </summary>
+        [HttpGet]
+        public void TestuowDbProvider()
+        {
+            unitOfWorkDbContextProvider.GetDbContext().Add(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+            
+            //unitOfWorkDbContextProvider.GetDbContext().Add(new Role() { Id = Guid.NewGuid(), RoleName = $"一个异常的角色{Guid.NewGuid()}{Guid.NewGuid()}" });
+
+            unitOfWorkDbContextProvider.GetDbContext().SaveChanges();
+
+           
+            otherDbContextProvider.GetDbContext().Add(new Role() { Id = Guid.NewGuid(), RoleName = $"角色{Guid.NewGuid()}" });
+        
+            unitOfWork.CommitAsync();
         }
 
         /// <summary>
