@@ -354,6 +354,17 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
             unitOfWork.Commit();
 
         }
+
+
+        /// <summary>
+        /// 获取Role
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        public List<Role> GetRoles()
+        { 
+           return roleRepo.Set().AsQueryable().ToList();
+        }
     
     }
 }

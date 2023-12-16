@@ -169,5 +169,10 @@ namespace OpenDeepSpace.EntityFrameworkCore
         {
             UpdateInternal(updateProperties, entities.ToArray());
         }
+
+        public DbSet<TEntity> Set()
+        {
+            return _unitOfWorkDbContextProvider.GetDbContext().Set<TEntity>();
+        }
     }
 }
