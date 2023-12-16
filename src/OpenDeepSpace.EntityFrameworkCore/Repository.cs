@@ -105,7 +105,35 @@ namespace OpenDeepSpace.EntityFrameworkCore
             
         }
 
-     
+        public void Update(Expression<Func<TEntity, object>>[] updateProperties = null, params TEntity[] entities)
+        {
+            UpdateInternal(updateProperties, entities);
+        }
 
+        private void UpdateInternal(Expression<Func<TEntity, object>>[] updateProperties, TEntity[] entities)
+        {
+            //需要更新的字段
+            if (updateProperties != null)
+            {
+                foreach (TEntity entity in entities)
+                {
+
+                    foreach (var property in updateProperties)
+                    {
+                        _unitOfWorkDbContextProvider.GetDbContext().Entry(entity).Property(property).IsModified = true;
+                    }
+                }
+            }
+            else
+            {
+                //整体更新
+                _unitOfWorkDbContextProvider.GetDbContext().UpdateRange(entities);
+            }
+        }
+
+        public void Update(IEnumerable<TEntity> entities, Expression<Func<TEntity, object>>[] updateProperties = null)
+        {
+            UpdateInternal(updateProperties, entities.ToArray());
+        }
     }
 }

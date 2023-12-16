@@ -277,6 +277,27 @@ namespace OpenDeepSpaceEntityFrameworkCore.Test.Controllers
 
             unitOfWork.Commit();
         }
+
+        /// <summary>
+        /// 测试批量更新
+        /// </summary>
+        /// <param name="roles"></param>
+        [HttpPost]
+        public void TestBatchUpdate(List<Role> roles)
+        {
+
+            //部分字段更新的表达式树数组
+            Expression<Func<Role, object>>[] expressions = {
+
+                //p=>p.RoleName,
+                p=>p.RoleDescription,
+
+            };
+
+            roleRepo.Update(expressions, roles.ToArray());
+
+            unitOfWork.Commit();
+        }
     
     }
 }

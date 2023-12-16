@@ -102,7 +102,21 @@ namespace OpenDeepSpace.EntityFrameworkCore
         /// <param name="updateProperties">指定需要更新的部分属性</param>
         TEntity Update(TEntity entity, Expression<Func<TEntity, object>>[] updateProperties = null);
 
-        
+        /// <summary>
+        /// 更新多个实体
+        /// </summary>
+        /// <param name="updateProperties">指定需要更新的部分属性</param>
+        /// <param name="entities"></param>
+        void Update(Expression<Func<TEntity, object>>[] updateProperties = null, params TEntity[] entities);
+
+
+        /// <summary>
+        /// 更新实体集合
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <param name="updateProperties">指定需要更新的部分属性</param>
+        void Update(IEnumerable<TEntity> entities, Expression<Func<TEntity, object>>[] updateProperties = null);
+
     }
 
     /// <summary>
